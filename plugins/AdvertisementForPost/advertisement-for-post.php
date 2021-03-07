@@ -95,6 +95,18 @@ function insertBeforeContent($content){
 add_filter('the_content', "insertBeforeContent");
 
 
+function render_post_advertisment() {
+    $opAdList  =  is_array(get_option('ad_post_list')) ? get_option('ad_post_list') : [];
+        $randomElement = $opAdList[array_rand($opAdList, 1)];
+        if(!empty($opAdList)){
+            $custom = "<div class='center' style='padding: 2rem; border: solid gray 2px; width: 100%'>$randomElement</div>";
+            return $custom;
+        }
+    return "<div></div>";
+}
+
+add_shortcode( 'ad_post_post_advertisment', 'render_post_advertisment');
+
 
 function ad_post_register_styles() { 
     wp_register_style('ad_post_styles', plugins_url('/css/style.css', __FILE__)); 
