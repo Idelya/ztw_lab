@@ -21,7 +21,9 @@ add_action('admin_menu', 'ad_post_admin_actions_register_menu');
 
 /* TODO: walidacja (długość), usuwanie ogłoszenia, losowanie i wyświetlanie,  kolejny plugin*/
 
-
+function isHTML($string){
+    return $string != strip_tags($string) ? true:false;
+}
 
 function ad_post_admin_page() { 
                                           
@@ -35,10 +37,16 @@ function ad_post_admin_page() {
         echo'<div class="notice notice-error is-dismissible"><p>Deleted advertisment.</p></div>';    
     } 
 
-    if(isset($_POST['ad_post_new']) and $_POST['ad_post_new']!=="") { 
-        array_push($opAdList, $_POST['ad_post_new']);
-        update_option('ad_post_list', $opAdList); 
-        echo'<div class="notice notice-success is-dismissible"><p>Added new advertisment.</p></div>';     
+    if(isset($_POST['ad_post_new']) and $_POST['ad_post_new']!=="") {
+        if(isHTML($_POST['ad_post_new'])){
+            array_push($opAdList, $_POST['ad_post_new']);
+            update_option('ad_post_list', $opAdList); 
+            echo'<div class="notice notice-success is-dismissible"><p>Added new advertisment.</p></div>';
+        }
+        else{
+            update_option('ad_post_list', $opAdList); 
+            echo'<div class="notice notice-error is-dismissible"><p>Content must be a valid <strong>HTML</strong> syntax</p></div>'; 
+        }    
     }
 
     ?>
@@ -76,8 +84,11 @@ function insertBeforeContent($content){
     if(is_singular() && in_the_loop() && is_main_query()){
         $opAdList  =  is_array(get_option('ad_post_list')) ? get_option('ad_post_list') : [];
         $randomElement = $opAdList[array_rand($opAdList, 1)];
-        $custom = "<div class='center' style='padding: 2rem; border: solid gray 2px; width: 100%'>$randomElement</div>";
-        return $custom.$content;
+        if(!empty($opAdList)){
+            $custom = "<div class='center' style='padding: 2rem; border: solid gray 2px; width: 100%'>$randomElement</div>";
+            return $custom.$content;
+        }
+        return $content;
     }
     return $content;
 }
